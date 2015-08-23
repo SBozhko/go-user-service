@@ -37,7 +37,7 @@ func defineRoutes(service *UserService) Routes {
 			"UserList",
 			"GET",
 			"/users",
-			service.UserList,
+			service.GetUserList,
 		},
 		Route{
 			"CreateUser",
@@ -49,7 +49,13 @@ func defineRoutes(service *UserService) Routes {
 			"UserProfile",
 			"GET",
 			"/users/{userId}",
-			service.UserProfile,
+			service.GetUserProfile,
+		},
+		Route{
+			"SignUpUser",
+			"POST",
+			"/signup",
+			service.SignUpUser,
 		},
 	}
 }

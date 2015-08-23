@@ -6,45 +6,53 @@ import (
 
 type Repository interface {
 	Init()
-	CreateUser(user User) User
+	CreateUser(user UserInDb) UserInDb
 	DeleteUser(id int) error
-	FindUser(id int) User
-	GetUsers() Users
+	FindUser(id int) UserInDb
+	GetUsers() UsersInDb
+	CreateUserByEmail(email string) UserInDb
 }
 
+// Not thread-safe
 type InMemoryRepository struct {
 	Repository
 	currentId int
-	users     Users
+	users     UsersInDb
 }
 
 // Give us some seed data
 func (repo *InMemoryRepository) Init() {
-	repo.CreateUser(User{FullName: "Hubert J. Farnsworth", Phone:"123-45-66", Address:"New New York"})
-	repo.CreateUser(User{FullName: "John A. Zoidberg", Phone:"236-22-62", Address:"New New York"})
-	repo.CreateUser(User{FullName: "Zapp Brannigan", Phone:"821-31-44", Address:"New New York"})
+	repo.CreateUser(UserInDb{FullName: "Hubert J. Farnsworth", Phone:"123-45-66", Address:"New New York"})
+	repo.CreateUser(UserInDb{FullName: "John A. Zoidberg", Phone:"236-22-62", Address:"New New York"})
+	repo.CreateUser(UserInDb{FullName: "Zapp Brannigan", Phone:"821-31-44", Address:"New New York"})
 }
 
-func (repo *InMemoryRepository) FindUser(id int) User {
+func (repo *InMemoryRepository) FindUser(id int) UserInDb {
 	for _, t := range repo.users {
 		if t.Id == id {
 			return t
 		}
 	}
 	// return empty User if not found
-	return User{}
+	return UserInDb{}
 }
 
-func (repo *InMemoryRepository) GetUsers() Users {
+func (repo *InMemoryRepository) GetUsers() UsersInDb {
 	return repo.users
 }
 
-//this is bad, I don't think it passes race conditions
-func (repo *InMemoryRepository) CreateUser(user User) User {
+func (repo *InMemoryRepository) CreateUser(user UserInDb) UserInDb {
 	repo.currentId += 1
 	user.Id = repo.currentId
 	repo.users = append(repo.users, user)
 	return user
+}
+
+func (repo *InMemoryRepository) CreateUserByEmail(email string) UserInDb {
+	repo.currentId += 1
+	newUser := UserInDb{Id:repo.currentId, Email:email}
+	repo.users = append(repo.users, newUser)
+	return newUser
 }
 
 func (repo *InMemoryRepository) DeleteUser(id int) error {
